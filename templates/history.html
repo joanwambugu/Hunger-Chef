@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}History{% endblock %}
+{% block content %}
+  <h2>Your Recipe History</h2>
+  <div id="historyContainer">Loading…</div>
+
+  <script>
+    async function loadHistory() {
+      const res = await fetch("/api/history");
+      if (!res.ok) {
+        document.getElementById("historyContainer").innerHTML = "<p>Error loading history</p>";
+        return;
+      }
+      const json = await res.json();
+      if (!json.history || json.history.length === 0) {
+        document.getElementById("historyContainer").innerHTML = "<p>No history yet</p>";
+        return;
+      }
+      const ul = document.createElement("ul");
+      json.history.forEach(h => {
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>${new Date(h.created_at).toLocaleString()}</strong> — <em>${h.ingredients}</em><div>${h.recipe}</div>`;
+        ul.appendChild(li);
+      });
+      document.getElementById("historyContainer").innerHTML = "";
+      document.getElementById("historyContainer").appendChild(ul);
+    }
+    loadHistory();
+  </script>
+{% endblock %}

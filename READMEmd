@@ -1,0 +1,30 @@
+# 🍲 AI Recipe Recommender (SDG Hunger Aligned)
+
+An MVP web app that generates **nutritious, low-waste recipes** based on ingredients users already have.  
+Built to support **UN SDG 2: Zero Hunger** by promoting sustainable food usage.
+
+---
+
+## 🚀 Features
+- Users enter available ingredients → AI generates a recipe with:
+  - Recipe Name
+  - Short Description
+  - Cooking Steps
+- **Daily Free Tier**: 2 free recipe attempts per user/day.
+- **Premium Tier**: Upgrade via **IntaSend payments** to continue generating unlimited recipes.
+- **Firebase**: Used as a lightweight store for tracking daily user attempts (no heavy DB needed).
+- **Flask Backend**: Handles API requests, integrates with OpenAI, Firebase, and IntaSend.
+- **Frontend (HTML/CSS/JS)**: Clean interface for easy use.
+
+---
+
+## 🏗️ Tech Stack
+- **Frontend**: HTML, CSS, JavaScript
+- **Backend**: Python Flask
+- **AI**: OpenAI API (GPT model)
+- **Database**: Firebase Firestore (tracks free attempts)
+- **Payments**: IntaSend Checkout for premium subscriptions
+
+---
+
+## 📂 Project Structure

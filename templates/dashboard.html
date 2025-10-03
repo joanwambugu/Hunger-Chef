@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+  <h2>Dashboard</h2>
+  <p>Welcome {{ current_user.username }} — {% if current_user.premium %}<strong>Premium</strong>{% else %}Free user (2 recipes/day){% endif %}</p>
+
+  <section class="card">
+    <h3>Generate a Recipe</h3>
+    <form id="recipeForm">
+      <input id="ingredients" placeholder="e.g. rice, beans, tomato" required style="width:100%;padding:8px;"><br><br>
+      <button type="submit" class="btn">Get Recipe</button>
+    </form>
+    <div id="recipeOutput" class="result"></div>
+  </section>
+
+  <section class="card">
+    <h3>Quick Tips to Save Food</h3>
+    <ul>
+      <li>Freeze leftovers in portion sizes</li>
+      <li>Use herbs and citrus to refresh flavors</li>
+      <li>Plan meals based on what you have</li>
+    </ul>
+  </section>
+
+  <script>
+    // handle fetch to /api/generate_recipe
+    const form = document.getElementById("recipeForm");
+    const output = document.getElementById("recipeOutput");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const ingredients = document.getElementById("ingredients").value;
+      output.innerHTML = "Generating recipe ...";
+
+      const res = await fetch("/api/generate_recipe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ingredients })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        output.innerHTML = `<p class="error">${data.error}</p>`;
+      } else {
+        output.innerHTML = `<pre>${data.recipe}</pre><p>Attempts left: ${data.attempts_left ?? '∞'}</p>`;
+      }
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Home - AI Recipe Recommender{% endblock %}
+{% block content %}
+  <section class="hero">
+    <h2>Fight Hunger — Use What You Have</h2>
+    <p>Enter available ingredients on the dashboard and get nutritious, low-waste recipes powered by AI.</p>
+    <a class="btn" href="{{ url_for('login') }}">Get Started</a>
+  </section>
+
+  <section class="content-cards">
+    <article>
+      <h3>Why this matters</h3>
+      <p>1.3 billion tons of food is wasted annually while many face hunger. This app helps reduce waste and create meals from available ingredients.</p>
+    </article>
+    <article>
+      <h3>How to save food</h3>
+      <ul>
+        <li>Plan meals and use leftovers</li>
+        <li>Store food properly</li>
+        <li>Use recipes for near-expiry ingredients</li>
+      </ul>
+    </article>
+  </section>
+{% endblock %}
