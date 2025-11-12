@@ -2,23 +2,99 @@
 {% block title %}Home - AI Recipe Recommender{% endblock %}
 {% block content %}
   <section class="hero">
-    <h2>Fight Hunger — Use What You Have</h2>
-    <p>Enter available ingredients on the dashboard and get nutritious, low-waste recipes powered by AI.</p>
-    <a class="btn" href="{{ url_for('login') }}">Get Started</a>
+    <div class="hero-content">
+      <h1 class="hero-title">Fight Hunger — Use What You Have</h1>
+      <p class="hero-subtitle">Enter available ingredients and get nutritious, low-waste recipes powered by AI.</p>
+      <div class="hero-buttons">
+        <a class="btn btn-primary" href="{{ url_for('login') }}">Get Started</a>
+        <a class="btn btn-secondary" href="#how-it-works">Learn More</a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <img src="{{ url_for('static', filename='images/hero-image.jpg') }}" alt="Fresh ingredients and recipes" />
+    </div>
+  </section>
+
+  <section id="how-it-works" class="features">
+    <h2 class="section-title">How It Works</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🥕</div>
+        <h3>1. Enter Ingredients</h3>
+        <p>List what you have in your kitchen - fresh, canned, or leftover items</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>2. AI Analysis</h3>
+        <p>Our smart algorithm finds the perfect recipes for your ingredients</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👨‍🍳</div>
+        <h3>3. Cook & Enjoy</h3>
+        <p>Get step-by-step recipes tailored to reduce food waste</p>
+      </div>
+    </div>
   </section>
 
   <section class="content-cards">
-    <article>
-      <h3>Why this matters</h3>
-      <p>1.3 billion tons of food is wasted annually while many face hunger. This app helps reduce waste and create meals from available ingredients.</p>
-    </article>
-    <article>
-      <h3>How to save food</h3>
-      <ul>
-        <li>Plan meals and use leftovers</li>
-        <li>Store food properly</li>
-        <li>Use recipes for near-expiry ingredients</li>
-      </ul>
-    </article>
+    <div class="card-grid">
+      <article class="card">
+        <div class="card-header">
+          <h3>Why This Matters</h3>
+        </div>
+        <div class="card-body">
+          <p>1.3 billion tons of food is wasted annually while millions face hunger. Transform your kitchen scraps into delicious meals and join the fight against food waste.</p>
+          <div class="stats">
+            <div class="stat">
+              <span class="stat-number">1.3B</span>
+              <span class="stat-label">Tons Wasted Yearly</span>
+            </div>
+            <div class="stat">
+              <span class="stat-number">800M</span>
+              <span class="stat-label">People Hungry</span>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-header">
+          <h3>Smart Food Saving Tips</h3>
+        </div>
+        <div class="card-body">
+          <ul class="tips-list">
+            <li class="tip-item">
+              <span class="tip-icon">📋</span>
+              <div>
+                <strong>Plan meals weekly</strong>
+                <p>Reduce impulse buys and use what you have</p>
+              </div>
+            </li>
+            <li class="tip-item">
+              <span class="tip-icon">🍲</span>
+              <div>
+                <strong>Creative leftovers</strong>
+                <p>Transform leftovers into new exciting dishes</p>
+              </div>
+            </li>
+            <li class="tip-item">
+              <span class="tip-icon">❄️</span>
+              <div>
+                <strong>Proper storage</strong>
+                <p>Extend food life with correct storage methods</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="cta-content">
+      <h2>Ready to Reduce Food Waste?</h2>
+      <p>Join thousands of users saving money and helping the planet</p>
+      <a class="btn btn-large" href="{{ url_for('login') }}">Start Cooking Smart Today</a>
+    </div>
   </section>
 {% endblock %}

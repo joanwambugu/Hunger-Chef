@@ -1,37 +1,203 @@
 {% extends "base.html" %}
-{% block title %}Dashboard{% endblock %}
+{% block title %}Dashboard - AI Recipe Recommender{% endblock %}
 {% block content %}
-  <h2>Dashboard</h2>
-  <p>Welcome {{ current_user.username }} — {% if current_user.premium %}<strong>Premium</strong>{% else %}Free user (2 recipes/day){% endif %}</p>
-
-  <section class="card">
-    <h3>Generate a Recipe</h3>
-    <form id="recipeForm">
-      <input id="ingredients" placeholder="e.g. rice, beans, tomato" required style="width:100%;padding:8px;"><br><br>
-      <button type="submit" class="btn">Get Recipe</button>
-    </form>
-    <div id="recipeOutput" class="result"></div>
+<div class="dashboard-container">
+  <!-- Welcome Section -->
+  <section class="welcome-section">
+    <div class="welcome-header">
+      <h1>Welcome back, {{ current_user.username }}! 👋</h1>
+      <div class="user-status {% if current_user.premium %}premium{% else %}free{% endif %}">
+        {% if current_user.premium %}
+        <span class="status-badge premium-badge">⭐ Premium Member</span>
+        <p>Unlimited recipe generations</p>
+        {% else %}
+        <span class="status-badge free-badge">🎯 Free Plan</span>
+        <p>{{ 2 - current_user.requests_today }} of 2 recipes left today</p>
+        {% endif %}
+      </div>
+    </div>
   </section>
 
-  <section class="card">
-    <h3>Quick Tips to Save Food</h3>
-    <ul>
-      <li>Freeze leftovers in portion sizes</li>
-      <li>Use herbs and citrus to refresh flavors</li>
-      <li>Plan meals based on what you have</li>
-    </ul>
-  </section>
+  <!-- Main Content Grid -->
+  <div class="dashboard-grid">
+    <!-- Recipe Generator Card -->
+    <section class="dashboard-card featured-card">
+      <div class="card-header">
+        <h2>🍳 Generate Recipe</h2>
+        <p>Enter ingredients you have available</p>
+      </div>
+      
+      <form id="recipeForm" class="recipe-form">
+        <div class="form-group">
+          <label for="ingredients" class="form-label">Available Ingredients</label>
+          <textarea 
+            id="ingredients" 
+            placeholder="e.g. chicken, rice, tomatoes, onions, garlic..."
+            required 
+            rows="3"
+            class="form-input"
+          ></textarea>
+          <small class="input-hint">Separate ingredients with commas</small>
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-full btn-large">
+          <span class="btn-text">Generate Recipe</span>
+          <span class="btn-loading" style="display: none;">
+            <span class="spinner"></span> Creating your recipe...
+          </span>
+        </button>
+      </form>
 
-  <script>
-    // handle fetch to /api/generate_recipe
-    const form = document.getElementById("recipeForm");
-    const output = document.getElementById("recipeOutput");
+      <div id="recipeOutput" class="recipe-output" style="display: none;">
+        <div class="recipe-header">
+          <h3>🎉 Your Custom Recipe</h3>
+          <button class="copy-btn" onclick="copyRecipe()" title="Copy recipe">
+            📋
+          </button>
+        </div>
+        <div class="recipe-content">
+          <pre id="recipeText"></pre>
+        </div>
+        <div class="recipe-footer">
+          <span class="attempts-left" id="attemptsLeft"></span>
+          <span class="recipe-tip">💡 Recipe saved to your history</span>
+        </div>
+      </div>
+    </section>
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const ingredients = document.getElementById("ingredients").value;
-      output.innerHTML = "Generating recipe ...";
+    <!-- Quick Tips Card -->
+    <section class="dashboard-card">
+      <div class="card-header">
+        <h2>💡 Food Saving Tips</h2>
+        <p>Smart ways to reduce waste</p>
+      </div>
+      
+      <div class="tips-grid">
+        <div class="tip-item">
+          <div class="tip-icon">❄️</div>
+          <div class="tip-content">
+            <h4>Freeze Smartly</h4>
+            <p>Portion leftovers before freezing for easy meals</p>
+          </div>
+        </div>
+        
+        <div class="tip-item">
+          <div class="tip-icon">🌿</div>
+          <div class="tip-content">
+            <h4>Refresh Flavors</h4>
+            <p>Use herbs and citrus to revive leftover dishes</p>
+          </div>
+        </div>
+        
+        <div class="tip-item">
+          <div class="tip-icon">📋</div>
+          <div class="tip-content">
+            <h4>Plan Ahead</h4>
+            <p>Create meals based on what needs to be used first</p>
+          </div>
+        </div>
+        
+        <div class="tip-item">
+          <div class="tip-icon">🍲</div>
+          <div class="tip-content">
+            <h4>Batch Cooking</h4>
+            <p>Cook once, eat multiple times with creative variations</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
+    <!-- Stats Card -->
+    <section class="dashboard-card">
+      <div class="card-header">
+        <h2>📊 Your Impact</h2>
+        <p>Together we're reducing food waste</p>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-number">{{ current_user.requests_today }}</div>
+          <div class="stat-label">Recipes Today</div>
+        </div>
+        
+        <div class="stat-item">
+          <div class="stat-number">
+            {% if current_user.premium %}∞{% else %}{{ 2 - current_user.requests_today }}{% endif %}
+          </div>
+          <div class="stat-label">Remaining Today</div>
+        </div>
+        
+        <div class="stat-item">
+          <div class="stat-number">
+            {{ current_user.premium and 'All' or '2' }}
+          </div>
+          <div class="stat-label">Daily Limit</div>
+        </div>
+      </div>
+      
+      {% if not current_user.premium %}
+      <div class="upgrade-cta">
+        <p>Want unlimited recipes?</p>
+        <a href="{{ url_for('upgrade') }}" class="btn btn-secondary btn-small">
+          Upgrade to Premium
+        </a>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Quick Actions Card -->
+    <section class="dashboard-card">
+      <div class="card-header">
+        <h2>🚀 Quick Actions</h2>
+        <p>Get started quickly</p>
+      </div>
+      
+      <div class="actions-grid">
+        <a href="{{ url_for('history_page') }}" class="action-item">
+          <span class="action-icon">📚</span>
+          <span class="action-text">View Recipe History</span>
+          <span class="action-arrow">→</span>
+        </a>
+        
+        <a href="/" class="action-item">
+          <span class="action-icon">🏠</span>
+          <span class="action-text">Back to Home</span>
+          <span class="action-arrow">→</span>
+        </a>
+        
+        <a href="{{ url_for('logout') }}" class="action-item">
+          <span class="action-icon">🚪</span>
+          <span class="action-text">Logout</span>
+          <span class="action-arrow">→</span>
+        </a>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById("recipeForm");
+  const output = document.getElementById("recipeOutput");
+  const recipeText = document.getElementById("recipeText");
+  const attemptsLeft = document.getElementById("attemptsLeft");
+  const btnText = document.querySelector('.btn-text');
+  const btnLoading = document.querySelector('.btn-loading');
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const ingredients = document.getElementById("ingredients").value.trim();
+    
+    if (!ingredients) {
+      showError("Please enter some ingredients");
+      return;
+    }
+
+    // Show loading state
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline';
+    form.querySelector('button').disabled = true;
+
+    try {
       const res = await fetch("/api/generate_recipe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -39,11 +205,354 @@
       });
 
       const data = await res.json();
+      
       if (!res.ok) {
-        output.innerHTML = `<p class="error">${data.error}</p>`;
+        showError(data.error);
       } else {
-        output.innerHTML = `<pre>${data.recipe}</pre><p>Attempts left: ${data.attempts_left ?? '∞'}</p>`;
+        showRecipe(data.recipe, data.attempts_left);
       }
+    } catch (error) {
+      showError("Network error. Please try again.");
+    } finally {
+      // Reset loading state
+      btnText.style.display = 'inline';
+      btnLoading.style.display = 'none';
+      form.querySelector('button').disabled = false;
+    }
+  });
+
+  function showRecipe(recipe, attempts) {
+    recipeText.textContent = recipe;
+    attemptsLeft.textContent = `Attempts left: ${attempts === null ? '∞' : attempts}`;
+    output.style.display = 'block';
+    output.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function showError(message) {
+    output.innerHTML = `<div class="error-message">❌ ${message}</div>`;
+    output.style.display = 'block';
+    output.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function copyRecipe() {
+    const recipe = recipeText.textContent;
+    navigator.clipboard.writeText(recipe).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      const original = btn.innerHTML;
+      btn.innerHTML = '✅ Copied!';
+      setTimeout(() => { btn.innerHTML = original; }, 2000);
     });
-  </script>
+  }
+</script>
+
+<style>
+  .dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .welcome-section {
+    margin-bottom: 2rem;
+  }
+
+  .welcome-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .welcome-header h1 {
+    font-size: 2rem;
+    color: #2d3748;
+    margin: 0;
+  }
+
+  .user-status {
+    text-align: right;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.875rem;
+  }
+
+  .premium-badge {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #7c5c00;
+  }
+
+  .free-badge {
+    background: #e2e8f0;
+    color: #4a5568;
+  }
+
+  .user-status p {
+    margin: 0.5rem 0 0 0;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+  }
+
+  .dashboard-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+  }
+
+  .featured-card {
+    grid-column: 1 / -1;
+  }
+
+  .card-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .card-header h2 {
+    font-size: 1.5rem;
+    color: #2d3748;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .card-header p {
+    color: #6b7280;
+    margin: 0;
+  }
+
+  .recipe-form {
+    margin-bottom: 1.5rem;
+  }
+
+  .input-hint {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+  }
+
+  .recipe-output {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .recipe-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .recipe-header h3 {
+    margin: 0;
+    color: #065f46;
+  }
+
+  .copy-btn {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+
+  .copy-btn:hover {
+    background: #dcfce7;
+  }
+
+  .recipe-content pre {
+    white-space: pre-wrap;
+    font-family: inherit;
+    line-height: 1.6;
+    color: #064e3b;
+    margin: 0;
+  }
+
+  .recipe-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #bbf7d0;
+    font-size: 0.875rem;
+    color: #047857;
+  }
+
+  .tips-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+
+  .tip-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .tip-content h4 {
+    margin: 0 0 0.25rem 0;
+    color: #2d3748;
+  }
+
+  .tip-content p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+
+  .stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--green);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+  }
+
+  .upgrade-cta {
+    text-align: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+    border-radius: 8px;
+    border: 1px solid #bbf7d0;
+  }
+
+  .upgrade-cta p {
+    margin: 0 0 0.75rem 0;
+    color: #065f46;
+    font-weight: 500;
+  }
+
+  .actions-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .action-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s;
+  }
+
+  .action-item:hover {
+    background: #e2e8f0;
+    transform: translateX(4px);
+  }
+
+  .action-icon {
+    font-size: 1.25rem;
+  }
+
+  .action-text {
+    flex: 1;
+    font-weight: 500;
+    color: #2d3748;
+  }
+
+  .action-arrow {
+    color: #6b7280;
+  }
+
+  .error-message {
+    color: #dc2626;
+    background: #fef2f2;
+    padding: 1rem;
+    border-radius: 6px;
+    border: 1px solid #fecaca;
+  }
+
+  .btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+    margin-right: 0.5rem;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @media (max-width: 768px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .featured-card {
+      grid-column: 1;
+    }
+    
+    .welcome-header {
+      flex-direction: column;
+      text-align: center;
+    }
+    
+    .user-status {
+      text-align: center;
+    }
+    
+    .stats-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>
 {% endblock %}

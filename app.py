@@ -16,10 +16,7 @@ load_dotenv()
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "super-secret")
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv(
-    "SQLALCHEMY_DATABASE_URI",
-    "mysql+pymysql://root:password@127.0.0.1/ai_recipe_db"
-)
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///recipes.db"  # Force SQLite
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -108,6 +105,75 @@ def check_and_increment_limit(user: User):
 
 
 # -------------------------
+# Gemini Helper Function
+# -------------------------
+def generate_recipe_with_fallback(ingredients):
+    """Try multiple Gemini models with fallback options"""
+    
+    prompt = (
+        "You are a helpful chef focused on nutritious, low-cost, low-waste recipes "
+        "aligned with UN SDG 2 (Zero Hunger). Given the following available ingredients, "
+        f"provide: a recipe name, a short description, ingredients list (if needed), and clear step-by-step instructions.\n\n"
+        f"Available ingredients: {ingredients}\n\n"
+        "Keep the recipe simple, nutritious, and appropriate for 1-4 people."
+    )
+    
+    # List of models to try in order
+    models_to_try = [
+        "gemini-1.5-flash",
+        "gemini-1.0-pro",
+        "gemini-pro",
+        "models/gemini-1.5-flash-001",  # Sometimes the full path works
+    ]
+    
+    for model_name in models_to_try:
+        try:
+            print(f"Trying model: {model_name}")  # Debug output
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(prompt)
+            recipe_text = response.text.strip()
+            
+            # If we get a successful response, return it
+            if recipe_text and len(recipe_text) > 50:  # Basic validation
+                print(f"Success with model: {model_name}")  # Debug output
+                return recipe_text
+                
+        except Exception as e:
+            print(f"Model {model_name} failed: {str(e)}")  # Debug output
+            continue
+    
+    # If all models fail, return a fallback recipe
+    return create_fallback_recipe(ingredients)
+
+def create_fallback_recipe(ingredients):
+    """Create a simple recipe when AI is unavailable"""
+    return f"""
+🍳 Recipe Created from: {ingredients}
+
+Since our AI chef is temporarily busy, here's a simple recipe idea:
+
+**Stir-Fry Medley**
+A quick and nutritious stir-fry using your available ingredients.
+
+**Ingredients:**
+- {ingredients}
+- 2 tbsp oil
+- Salt and pepper to taste
+- Optional: soy sauce, garlic, ginger
+
+**Instructions:**
+1. Chop all your ingredients into bite-sized pieces
+2. Heat oil in a large pan or wok over medium-high heat
+3. Add harder vegetables first, cook for 2-3 minutes
+4. Add remaining ingredients and stir-fry for 3-4 minutes
+5. Season with salt, pepper, and any available spices
+6. Serve hot over rice or enjoy as is!
+
+💡 Tip: This method works well with almost any combination of vegetables and proteins.
+"""
+
+
+# -------------------------
 # Routes: frontend pages
 # -------------------------
 @app.route("/")
@@ -189,28 +255,38 @@ def api_generate_recipe():
     if not allowed:
         return jsonify({"error": "Free limit reached. Upgrade to premium to continue."}), 403
 
-    # Build Gemini prompt
-    prompt = (
-        "You are a helpful chef focused on nutritious, low-cost, low-waste recipes "
-        "aligned with UN SDG 2 (Zero Hunger). Given the following available ingredients, "
-        f"provide: a recipe name, a short description, ingredients list (if needed), and clear step-by-step instructions.\n\n"
-        f"Available ingredients: {ingredients}\n\n"
-        "Keep the recipe simple, nutritious, and appropriate for 1-4 people."
-    )
-
     try:
-        model = genai.GenerativeModel("gemini-2.5-pro")
-        response = model.generate_content(prompt)
-        recipe_text = response.text.strip()
+        # Use the fallback function that tries multiple models
+        recipe_text = generate_recipe_with_fallback(ingredients)
+        
+        # Save to history
+        rh = RecipeHistory(user_id=current_user.id, ingredients=ingredients, recipe=recipe_text)
+        db.session.add(rh)
+        db.session.commit()
+
+        return jsonify({
+            "recipe": recipe_text, 
+            "attempts_left": attempts_left,
+            "note": "Fallback recipe used - AI service experiencing issues" if "fallback" in recipe_text.lower() else None
+        })
+
     except Exception as e:
-        return jsonify({"error": "Gemini error: " + str(e)}), 500
-
-    # Save to history
-    rh = RecipeHistory(user_id=current_user.id, ingredients=ingredients, recipe=recipe_text)
-    db.session.add(rh)
-    db.session.commit()
-
-    return jsonify({"recipe": recipe_text, "attempts_left": attempts_left})
+        error_msg = str(e)
+        print(f"Final error: {error_msg}")  # Debug output
+        
+        # Create emergency fallback recipe
+        emergency_recipe = create_fallback_recipe(ingredients)
+        
+        # Still save to history
+        rh = RecipeHistory(user_id=current_user.id, ingredients=ingredients, recipe=emergency_recipe)
+        db.session.add(rh)
+        db.session.commit()
+        
+        return jsonify({
+            "recipe": emergency_recipe, 
+            "attempts_left": attempts_left,
+            "note": "Emergency fallback - AI service unavailable"
+        })
 
 
 @app.route("/api/history", methods=["GET"])
@@ -226,6 +302,26 @@ def api_history():
         for r in rows
     ]
     return jsonify({"history": history})
+
+
+# -------------------------
+# Debug route to check available models
+# -------------------------
+@app.route("/_debug_models")
+def debug_models():
+    """Debug route to check available Gemini models"""
+    try:
+        models = genai.list_models()
+        available_models = []
+        for model in models:
+            if 'generateContent' in model.supported_generation_methods:
+                available_models.append({
+                    'name': model.name,
+                    'methods': model.supported_generation_methods
+                })
+        return jsonify({"available_models": available_models})
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
 
 # -------------------------
@@ -250,6 +346,12 @@ def init_db():
     db.create_all()
     return "DB created"
 
+
+# -------------------------
+# Create tables on startup
+# -------------------------
+with app.app_context():
+    db.create_all()
 
 # -------------------------
 # Run
