@@ -237,8 +237,8 @@ def generate_recipe_with_fallback(ingredients):
     
     # List of models to try in order
     models_to_try = [
-       "gemini-2.0-flash-001",  # Primary recommendation
-        "gemini-1.5-flash-002",  # If you need a 1.5 model, use this specific version
+       "gemini-2.5-flash-001",  # Primary recommendation
+        "gemini-2.0-flash-002",  # If you need a 1.5 model, use this specific version
     ]
     
     for model_name in models_to_try:
