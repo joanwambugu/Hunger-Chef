@@ -1,30 +1,327 @@
-# 🍲 AI Recipe Recommender (SDG Hunger Aligned)
+🍲 Zero Hunger Chef - AI Recipe Generator
+A beautiful web application that generates nutritious, low-waste recipes based on ingredients users already have. Built to support UN SDG 2: Zero Hunger by promoting sustainable food usage and reducing food waste.
 
-An MVP web app that generates **nutritious, low-waste recipes** based on ingredients users already have.  
-Built to support **UN SDG 2: Zero Hunger** by promoting sustainable food usage.
+✨ Features
+🎯 Core Functionality
+AI-Powered Recipe Generation: Enter available ingredients → Get creative, nutritious recipes
 
----
+Food Waste Reduction: Transform leftover ingredients into delicious meals
 
-## 🚀 Features
-- Users enter available ingredients → AI generates a recipe with:
-  - Recipe Name
-  - Short Description
-  - Cooking Steps
-- **Daily Free Tier**: 2 free recipe attempts per user/day.
-- **Premium Tier**: Upgrade via **IntaSend payments** to continue generating unlimited recipes.
-- **Firebase**: Used as a lightweight store for tracking daily user attempts (no heavy DB needed).
-- **Flask Backend**: Handles API requests, integrates with OpenAI, Firebase, and IntaSend.
-- **Frontend (HTML/CSS/JS)**: Clean interface for easy use.
+User-Friendly Interface: Beautiful, responsive design that works on all devices
 
----
+🍳 Recipe Features
+Creative recipe names and descriptions
 
-## 🏗️ Tech Stack
-- **Frontend**: HTML, CSS, JavaScript
-- **Backend**: Python Flask
-- **AI**: OpenAI API (GPT model)
-- **Database**: Firebase Firestore (tracks free attempts)
-- **Payments**: IntaSend Checkout for premium subscriptions
+Clear, step-by-step cooking instructions
 
----
+Ingredient-focused meal planning
 
-## 📂 Project Structure
+Recipe categorization (Protein, Carbs, Dessert, Vegetable)
+
+📱 User Experience
+Unlimited Access: No restrictions - generate as many recipes as you need
+
+Recipe History: Beautiful timeline of all your generated recipes
+
+Smart Search: Search and filter through your recipe history
+
+One-Click Regeneration: Create new variations of existing recipes
+
+🎨 Design Highlights
+Modern, clean interface with beautiful animations
+
+Floating ingredient animations
+
+Interactive recipe cards with hover effects
+
+Responsive design for mobile and desktop
+
+Professional color scheme aligned with sustainability
+
+🏗️ Tech Stack
+Backend
+Python 3.8+ - Core programming language
+
+Flask 2.3.3 - Web framework with latest features
+
+Flask-SQLAlchemy 3.0.5 - Database ORM integration
+
+SQLAlchemy - Powerful SQL toolkit and ORM
+
+SQLite - Development database (production-ready for PostgreSQL/MySQL)
+
+Flask-Login 0.6.3 - User session management and authentication
+
+Frontend
+HTML5 - Semantic markup
+
+CSS3 - Modern styling with CSS Grid and Flexbox
+
+JavaScript (ES6+) - Interactive features
+
+Font Awesome - Icons
+
+Google Fonts - Typography (Inter)
+
+AI & APIs
+Google Gemini AI - For intelligent recipe generation
+
+Multiple Model Fallback - Automatic failover between AI models
+
+📂 Project Structure
+text
+zero-hunger-chef/
+├── app.py                          # Main Flask application
+├── requirements.txt                # Python dependencies
+├── .env                           # Environment variables
+│
+├── static/
+│   ├── css/
+│   │   └── style.css              # Comprehensive styling
+│   ├── js/
+│   │   ├── dashboard.js           # Dashboard functionality
+│   │   └── history.js             # Enhanced history page
+│   └── images/                    # Static assets
+│
+├── templates/
+│   ├── base.html                  # Base template
+│   ├── index.html                 # Landing page
+│   ├── login.html                 # Login page
+│   ├── register.html              # Registration page
+│   ├── dashboard.html             # Recipe generation dashboard
+│   └── history.html               # Beautiful recipe history
+│
+├── instance/
+│   └── recipes.db                 # SQLite database
+│
+└── README.md                      # This file
+🚀 Quick Start
+Prerequisites
+Python 3.8 or higher
+
+Google Gemini API key
+
+Installation
+Clone the repository
+
+bash
+git clone <repository-url>
+cd zero-hunger-chef
+Create virtual environment
+
+bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+Install dependencies
+
+bash
+pip install -r requirements.txt
+Environment setup
+Create a .env file:
+
+env
+SECRET_KEY=your-secret-key-here
+GOOGLE_API_KEY=your-gemini-api-key-here
+Initialize database
+
+bash
+flask --app app.py _init_db
+Run the application
+
+bash
+python app.py
+Visit the application
+Open http://127.0.0.1:5000 in your browser
+
+🎯 How to Use
+1. Get Started
+Visit the homepage and create an account
+
+No payment required - completely free!
+
+2. Generate Recipes
+Go to the Dashboard
+
+Enter ingredients you have available (comma-separated)
+
+Click "Generate Recipe" to get AI-powered suggestions
+
+3. Manage Your Recipes
+View your complete recipe history
+
+Search and filter recipes
+
+Copy recipes to clipboard
+
+Regenerate new variations
+
+4. Example Usage
+text
+Input: "chicken, rice, broccoli, garlic"
+Output: A complete recipe with instructions for a balanced meal
+🔧 Configuration
+Environment Variables
+SECRET_KEY: Flask secret key for session security
+
+GOOGLE_API_KEY: Your Google Gemini API key
+
+Database
+The application uses SQLite by default with models for:
+
+Users: Authentication and user management
+
+RecipeHistory: Stores all generated recipes with timestamps
+
+AI Configuration
+Primary model: gemini-2.0-flash-001
+
+Fallback models for reliability
+
+Creative temperature settings for varied recipes
+
+🌟 Key Features in Detail
+Smart Recipe Generation
+Context-Aware: Understands ingredient combinations
+
+Nutrition-Focused: Emphasizes balanced, healthy meals
+
+Waste-Reducing: Maximizes use of available ingredients
+
+Practical: Realistic cooking times and instructions
+
+Beautiful User Interface
+Modern Design: Clean, professional appearance
+
+Responsive: Works perfectly on mobile and desktop
+
+Interactive: Smooth animations and transitions
+
+Accessible: Clear navigation and user feedback
+
+Recipe Management
+Complete History: Never lose a recipe
+
+Smart Search: Find recipes by ingredients or content
+
+Easy Sharing: Copy recipes with one click
+
+Quick Regeneration: Create new versions instantly
+
+🔒 Security Features
+Secure Authentication: Flask-Login with password hashing
+
+Session Management: Secure user sessions
+
+Input Validation: Sanitized user inputs
+
+SQL Injection Protection: SQLAlchemy ORM
+
+📱 Responsive Design
+The application is fully responsive and optimized for:
+
+Desktop (1200px+): Full feature set with multi-column layouts
+
+Tablet (768px-1199px): Adapted layouts with maintained functionality
+
+Mobile (<768px): Streamlined single-column design with touch-friendly interfaces
+
+🛠️ Development
+Running in Development Mode
+bash
+python app.py
+# or
+flask --app app.py run --debug
+Database Management
+bash
+# Initialize database
+flask --app app.py _init_db
+
+# Debug database (DEV)
+http://127.0.0.1:5000/_debug_db
+API Testing
+bash
+# Test history API (while logged in)
+http://127.0.0.1:5000/api/history
+
+# Debug models
+http://127.0.0.1:5000/_debug_models
+🚀 Deployment
+For Production
+Set DEBUG=False in environment
+
+Use production WSGI server (Gunicorn)
+
+Configure proper database (PostgreSQL recommended)
+
+Set up reverse proxy (Nginx)
+
+Configure SSL certificates
+
+Environment Setup
+env
+SECRET_KEY=your-production-secret-key
+GOOGLE_API_KEY=your-gemini-api-key
+DATABASE_URL=your-database-connection-string
+🤝 Contributing
+We welcome contributions! Please feel free to submit pull requests for:
+
+New features
+
+Bug fixes
+
+Documentation improvements
+
+UI/UX enhancements
+
+Development Setup
+Fork the repository
+
+Create a feature branch
+
+Make your changes
+
+Test thoroughly
+
+Submit a pull request
+
+📄 License
+This project is open source and available under the MIT License.
+
+🎯 UN Sustainable Development Goals Alignment
+This project directly supports UN SDG 2: Zero Hunger by:
+
+Reducing food waste through smart recipe generation
+
+Promoting nutritious meal planning
+
+Making cooking accessible to everyone
+
+Encouraging sustainable food practices
+
+📞 Support
+If you encounter any issues or have questions:
+
+Check the browser console for errors
+
+Verify your API keys are correct
+
+Ensure all dependencies are installed
+
+Check the application logs for detailed error information
+
+🔮 Future Enhancements
+Recipe rating and favorites system
+
+Meal planning calendar
+
+Shopping list generation
+
+Nutritional information analysis
+
+Social sharing features
+
+Multi-language support
+
+Advanced dietary preferences
+
+Built with ❤️ for a world without hunger

@@ -1,30 +1,137 @@
 {% extends "base.html" %}
-{% block title %}History{% endblock %}
-{% block content %}
-  <h2>Your Recipe History</h2>
-  <div id="historyContainer">Loading…</div>
 
-  <script>
-    async function loadHistory() {
-      const res = await fetch("/api/history");
-      if (!res.ok) {
-        document.getElementById("historyContainer").innerHTML = "<p>Error loading history</p>";
-        return;
-      }
-      const json = await res.json();
-      if (!json.history || json.history.length === 0) {
-        document.getElementById("historyContainer").innerHTML = "<p>No history yet</p>";
-        return;
-      }
-      const ul = document.createElement("ul");
-      json.history.forEach(h => {
-        const li = document.createElement("li");
-        li.innerHTML = `<strong>${new Date(h.created_at).toLocaleString()}</strong> — <em>${h.ingredients}</em><div>${h.recipe}</div>`;
-        ul.appendChild(li);
-      });
-      document.getElementById("historyContainer").innerHTML = "";
-      document.getElementById("historyContainer").appendChild(ul);
-    }
-    loadHistory();
-  </script>
+{% block title %}Recipe History - Zero Hunger Chef{% endblock %}
+
+{% block content %}
+<div class="history-container">
+    <!-- Header Section -->
+    <div class="history-hero">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <i class="fas fa-book-open me-3"></i>
+                Your Recipe Journey
+            </h1>
+            <p class="hero-subtitle">Every ingredient tells a story. Relive your culinary creations and discover new possibilities.</p>
+            
+            <!-- Animated Stats -->
+            <div class="animated-stats">
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-receipt"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number" id="totalRecipes">0</span>
+                        <span class="stat-label">Total Recipes</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-star"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number" id="thisMonth">0</span>
+                        <span class="stat-label">This Month</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number" id="savings">0</span>
+                        <span class="stat-label">Food Saved</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="hero-graphic">
+            <div class="floating-ingredients">
+                <div class="ingredient tomato"><i class="fas fa-apple-alt"></i></div>
+                <div class="ingredient carrot"><i class="fas fa-carrot"></i></div>
+                <div class="ingredient fish"><i class="fas fa-fish"></i></div>
+                <div class="ingredient bread"><i class="fas fa-bread-slice"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="search-filters-card">
+        <div class="search-section">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search recipes by ingredients or name...">
+                <button class="search-clear" onclick="clearSearch()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="filters-section">
+            <div class="filter-group">
+                <span class="filter-label">Filter by:</span>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">
+                        <i class="fas fa-layer-group me-2"></i>All Recipes
+                    </button>
+                    <button class="filter-btn" data-filter="recent">
+                        <i class="fas fa-clock me-2"></i>Last 7 Days
+                    </button>
+                    <button class="filter-btn" data-filter="favorite">
+                        <i class="fas fa-star me-2"></i>Favorites
+                    </button>
+                </div>
+            </div>
+            
+            <div class="sort-group">
+                <select id="sortSelect" class="sort-select">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="ingredients">By Ingredients</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Area -->
+    <div id="historyContent">
+        <div class="loading-state">
+            <div class="loading-spinner">
+                <div class="spinner-circle"></div>
+                <div class="spinner-circle"></div>
+                <div class="spinner-circle"></div>
+            </div>
+            <h3>Loading Your Culinary Journey</h3>
+            <p>Fetching your delicious recipes...</p>
+        </div>
+    </div>
+
+    <!-- Floating Action Button -->
+    <div class="floating-actions">
+        <button class="fab primary" onclick="scrollToTop()" title="Scroll to Top">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        <button class="fab secondary" onclick="exportHistory()" title="Export Recipes">
+            <i class="fas fa-download"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Recipe Modal -->
+<div class="modal-overlay" id="recipeModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Recipe Details</h3>
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="modalBody">
+            <!-- Modal content will be inserted here -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='history.js') }}"></script>
 {% endblock %}

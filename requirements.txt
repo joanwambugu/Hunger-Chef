@@ -1,8 +1,8 @@
-flask
-flask-sqlalchemy
-flask-login
-python-dotenv
-werkzeug
-pymysql
-google-generativeai
-requests
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+Flask-Login==0.6.3
+python-dotenv==1.0.0
+Werkzeug==2.3.7
+PyMySQL==1.1.0
+google-generativeai==0.3.0
+requests==2.31.0

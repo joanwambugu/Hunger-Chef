@@ -6,14 +6,9 @@
   <section class="welcome-section">
     <div class="welcome-header">
       <h1>Welcome back, {{ current_user.username }}! 👋</h1>
-      <div class="user-status {% if current_user.premium %}premium{% else %}free{% endif %}">
-        {% if current_user.premium %}
-        <span class="status-badge premium-badge">⭐ Premium Member</span>
-        <p>Unlimited recipe generations</p>
-        {% else %}
-        <span class="status-badge free-badge">🎯 Free Plan</span>
-        <p>{{ 2 - current_user.requests_today }} of 2 recipes left today</p>
-        {% endif %}
+      <div class="user-status">
+        <span class="status-badge unlimited-badge">🌟 Unlimited Access</span>
+        <p>Generate as many recipes as you want!</p>
       </div>
     </div>
   </section>
@@ -59,7 +54,7 @@
           <pre id="recipeText"></pre>
         </div>
         <div class="recipe-footer">
-          <span class="attempts-left" id="attemptsLeft"></span>
+          <span class="attempts-left">∞ Unlimited recipes remaining</span>
           <span class="recipe-tip">💡 Recipe saved to your history</span>
         </div>
       </div>
@@ -116,33 +111,24 @@
       
       <div class="stats-grid">
         <div class="stat-item">
-          <div class="stat-number">{{ current_user.requests_today }}</div>
-          <div class="stat-label">Recipes Today</div>
+          <div class="stat-number">∞</div>
+          <div class="stat-label">Recipes Available</div>
         </div>
         
         <div class="stat-item">
-          <div class="stat-number">
-            {% if current_user.premium %}∞{% else %}{{ 2 - current_user.requests_today }}{% endif %}
-          </div>
-          <div class="stat-label">Remaining Today</div>
+          <div class="stat-number">0</div>
+          <div class="stat-label">Food Wasted</div>
         </div>
         
         <div class="stat-item">
-          <div class="stat-number">
-            {{ current_user.premium and 'All' or '2' }}
-          </div>
-          <div class="stat-label">Daily Limit</div>
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Free Access</div>
         </div>
       </div>
       
-      {% if not current_user.premium %}
-      <div class="upgrade-cta">
-        <p>Want unlimited recipes?</p>
-        <a href="{{ url_for('upgrade') }}" class="btn btn-secondary btn-small">
-          Upgrade to Premium
-        </a>
+      <div class="impact-message">
+        <p>Every recipe you generate helps reduce food waste and supports UN SDG 2: Zero Hunger</p>
       </div>
-      {% endif %}
     </section>
 
     <!-- Quick Actions Card -->
@@ -179,7 +165,6 @@
   const form = document.getElementById("recipeForm");
   const output = document.getElementById("recipeOutput");
   const recipeText = document.getElementById("recipeText");
-  const attemptsLeft = document.getElementById("attemptsLeft");
   const btnText = document.querySelector('.btn-text');
   const btnLoading = document.querySelector('.btn-loading');
 
@@ -209,7 +194,7 @@
       if (!res.ok) {
         showError(data.error);
       } else {
-        showRecipe(data.recipe, data.attempts_left);
+        showRecipe(data.recipe);
       }
     } catch (error) {
       showError("Network error. Please try again.");
@@ -221,9 +206,8 @@
     }
   });
 
-  function showRecipe(recipe, attempts) {
+  function showRecipe(recipe) {
     recipeText.textContent = recipe;
-    attemptsLeft.textContent = `Attempts left: ${attempts === null ? '∞' : attempts}`;
     output.style.display = 'block';
     output.scrollIntoView({ behavior: 'smooth' });
   }
@@ -282,14 +266,9 @@
     font-size: 0.875rem;
   }
 
-  .premium-badge {
-    background: linear-gradient(135deg, #ffd700, #ffed4e);
-    color: #7c5c00;
-  }
-
-  .free-badge {
-    background: #e2e8f0;
-    color: #4a5568;
+  .unlimited-badge {
+    background: linear-gradient(135deg, #10b981, #34d399);
+    color: white;
   }
 
   .user-status p {
@@ -453,7 +432,7 @@
     margin-top: 0.25rem;
   }
 
-  .upgrade-cta {
+  .impact-message {
     text-align: center;
     padding: 1rem;
     background: linear-gradient(135deg, #f0fdf4, #dcfce7);
@@ -461,10 +440,11 @@
     border: 1px solid #bbf7d0;
   }
 
-  .upgrade-cta p {
-    margin: 0 0 0.75rem 0;
+  .impact-message p {
+    margin: 0;
     color: #065f46;
     font-weight: 500;
+    font-size: 0.9rem;
   }
 
   .actions-grid {
